@@ -16,7 +16,7 @@ Allows users to register, take quizzes at different difficulty levels, track pro
 
 1.**Clone the repo**
   ```bash
-  git clone https://github.com/your-username/quiz-app.git
+  git clone https://github.com/Chauhan48/Quizz.git
   cd quiz-app
   ```
 2. **install dependencies**
