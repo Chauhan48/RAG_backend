@@ -24,7 +24,7 @@
 <body>
   <h1><%= difficulty %> Level Test</h1>
 
-  <form action="/user/dashboard" method="POST">
+  <form action="/user/progress" method="POST">
     <% questions.forEach((q, idx) => { %>
       <div class="question-block">
         <p><%= idx + 1 %>. <%= q.question %></p>

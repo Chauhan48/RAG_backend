@@ -62,23 +62,15 @@ userController.login = async (req, res) => {
 userController.getDashboard = async (req, res) => {
   try {
     const progress = await progressModel.findOne({ userId: req.user._id });
-    if (!progress) {
-      res.render('dashboard', {
-        level: progress ? progress.level : 'Beginner',
-        weakAreas: progress && Array.isArray(progress.weakAreas) ? progress.weakAreas : [],
-        scoreHistory: progress ? progress.scoreHistory : []
-      });
-
-    }
-
-    res.render('dashboard', {
+    
+    return res.render('dashboard', {
       level: progress ? progress.level : 'Beginner',
-      weakAreas: Array.isArray(progress?.weakAreas) ? progress.weakAreas : [],
+      weakAreas: progress && Array.isArray(progress.weakAreas) ? progress.weakAreas : [],
       scoreHistory: progress ? progress.scoreHistory : []
     });
 
   } catch (err) {
-    res.status(500).send('Server error');
+    return res.status(500).send('Server error');
   }
 };
 
@@ -96,30 +88,30 @@ userController.getProgress = async (req, res) => {
 
 userController.updateProgress = async (req, res) => {
   try {
-    const { level, score, weakAreas } = req.body;
+    console.log('Dashboard route, req.user:', req.user);
 
-    const userId = common.convertToMongoDbObjectId(req.params.userId);
-    const progress = await dbServices.findOne(progressModel, { userId });
+    const userId = req.user._id;
+    const progress = await progressModel.findOne({ userId });
 
-    if (!progress) {
-      await dbServices.insert(progressModel, { userId })
-    }
+    console.log('Progress:', progress);
 
-    if (level) progress.level = level;
+    // ✅ response sent exactly once
+    return res.render('dashboard', {
+      level: progress ? progress.level : 'Beginner',
+      weakAreas: progress ? progress.weakAreas : [],
+      scoreHistory: progress ? progress.scoreHistory : []
+    });
 
-    if (score !== undefined) {
-      progress.scoreHistory.push({ score, date: new Date() });
-    }
-
-    if (Array.isArray(weakAreas)) {
-      progress.weakAreas = weakAreas;
-    }
-
-    await progress.save();
-    res.json(progress);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error in dashboard route:', err);
+
+    // ✅ don’t send again if already sent
+    if (!res.headersSent) {
+      return res.status(500).send('Internal Server Error');
+    }
   }
-}
+};
+
+
 
 module.exports = userController;

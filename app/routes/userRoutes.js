@@ -16,13 +16,14 @@ userRoutes.get('/login', (_, res) => {
 userRoutes.post('/login', userController.login);
 
 // dashboard route
-userRoutes.get('/dashboard', authMiddleware, (_, res) => {
-  res.render('dashboard');
-});
+userRoutes.get('/dashboard', authMiddleware, userController.getDashboard);
+// userRoutes.get('/dashboard', authMiddleware, (_, res) => {
+//   res.render('dashboard');
+// });
 
 // get progress data for a user
-userRoutes.get('/:userId', userController.getProgress);
+userRoutes.get('/:userId', authMiddleware, userController.getProgress);
 
-userRoutes.post('/:userId', userController.updateProgress);
+userRoutes.post('/:userId', authMiddleware, userController.updateProgress);
 
 module.exports = userRoutes;
