@@ -1,5 +1,0 @@
-const userController = {};
-
-userController.signup = async () => {
-    
-}
