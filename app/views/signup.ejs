@@ -21,11 +21,11 @@
 <body>
   <h1 style="text-align: center;">Sign Up</h1>
     <% if (errorMsg) { %>
-    <p style="color: red;"><%= errorMsg %></p>
+    <p style="color: red; text-align: center;"><%= errorMsg %></p>
     <% } %>
 
     <% if (successMsg) { %>
-    <p style="color: green;"><%= successMsg %></p>
+    <p style="color: green; text-align: center;"><%= successMsg %></p>
     <% } %>
 
   <form action="/user/signup" method="POST">
@@ -42,7 +42,7 @@
     <input type="password" id="password" name="password" required minlength="6" />
 
     <button type="submit">Sign Up</button>
-    <p>Already have an account <a href="#">Login</a></p>
+    <p>Already have an account <a href="/user/login">Login</a></p>
   </form>
 </body>
 </html>

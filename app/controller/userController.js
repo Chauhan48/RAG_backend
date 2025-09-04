@@ -19,11 +19,33 @@ userController.signup = async (req, res) => {
 
     await dbServices.insert(userModel, userData);
 
-    return res.redirect('/dashboard');
+    return res.redirect('/user/dashboard');
   } catch (error) {
     return res.status(500).render('signup', { errorMsg: 'Internal server error', successMsg: null });
   }
 };
 
+userController.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const userData = await dbServices.findOne(userModel, { email });
+
+    if (userData === null) {
+      throw new Error('Invalid email or password');
+    }
+
+    const comparePass = await common.comparePassword(password, userData.password);
+
+    if (!comparePass) {
+      throw new Error('Invalid email or password');
+    }
+
+    return res.redirect('/user/dashboard')
+  } catch (err) {
+    return res.status(401).render('login', { errorMsg: err.message, successMsg: null });
+  }
+
+}
 
 module.exports = userController;
