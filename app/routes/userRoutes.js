@@ -4,9 +4,9 @@ const userController = require('../controller/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // signup routes
-userRoutes.get('', (_, res) => { 
-  res.render('signup', { errorMsg: null, successMsg: null });
-});
+// userRoutes.get('', (_, res) => { 
+//   res.render('signup', { errorMsg: null, successMsg: null });
+// });
 userRoutes.post('/signup', userController.signup);
 
 // login routes

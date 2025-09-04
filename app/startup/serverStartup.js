@@ -12,6 +12,10 @@ const serverStartup = async (app) => {
     app.set('views', path.join(__dirname, '../views'));
     app.use('/user', userRoutes);
 
+    app.get('/', (_, res) => { 
+        res.render('signup', { errorMsg: null, successMsg: null });
+    });
+
     app.get('/test/:difficulty', async (req, res) => {
         const difficulty = req.params.difficulty;
 
