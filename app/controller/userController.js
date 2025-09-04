@@ -63,10 +63,18 @@ userController.getDashboard = async (req, res) => {
   try {
     const progress = await progressModel.findOne({ userId: req.user._id });
     
+    // Get query parameters for success/error messages
+    const testCompleted = req.query.testCompleted === 'true';
+    const score = req.query.score;
+    const error = req.query.error;
+    
     return res.render('dashboard', {
       level: progress ? progress.level : 'Beginner',
       weakAreas: progress && Array.isArray(progress.weakAreas) ? progress.weakAreas : [],
-      scoreHistory: progress ? progress.scoreHistory : []
+      scoreHistory: progress ? progress.scoreHistory : [],
+      testCompleted: testCompleted,
+      lastScore: score,
+      error: error
     });
 
   } catch (err) {
@@ -85,6 +93,74 @@ userController.getProgress = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 }
+
+userController.submitTest = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const answers = req.body;
+    
+    // Get the questions that were answered (we need to get them from the session or pass them)
+    // For now, let's assume we can get the difficulty from the referrer or session
+    const referer = req.get('Referer') || '';
+    const difficultyMatch = referer.match(/\/test\/(\w+)/);
+    const difficulty = difficultyMatch ? difficultyMatch[1] : 'beginner';
+    
+    // Get questions for this difficulty level
+    const questionModel = require('../modals/questionModel');
+    const questions = await questionModel.find({ difficulty: new RegExp(`^${difficulty}$`, 'i') });
+    
+    // Calculate score
+    let correctAnswers = 0;
+    let totalQuestions = questions.length;
+    
+    questions.forEach((question, index) => {
+      const userAnswer = answers[`question_${index}`];
+      if (userAnswer && parseInt(userAnswer) === question.answer) {
+        correctAnswers++;
+      }
+    });
+    
+    const score = Math.round((correctAnswers / totalQuestions) * 100);
+    
+    // Find or create progress record
+    let progress = await progressModel.findOne({ userId });
+    
+    if (!progress) {
+      progress = new progressModel({
+        userId: userId,
+        level: 'Beginner',
+        scoreHistory: [],
+        weakAreas: []
+      });
+    }
+    
+    // Add new score to history
+    progress.scoreHistory.push({
+      date: new Date(),
+      score: score
+    });
+    
+    // Update level based on average score
+    const avgScore = progress.scoreHistory.reduce((sum, entry) => sum + entry.score, 0) / progress.scoreHistory.length;
+    if (avgScore >= 80) {
+      progress.level = 'Advanced';
+    } else if (avgScore >= 60) {
+      progress.level = 'Intermediate';
+    } else {
+      progress.level = 'Beginner';
+    }
+    
+    // Save progress
+    await progress.save();
+    
+    // Redirect to dashboard with success message
+    return res.redirect('/user/dashboard?testCompleted=true&score=' + score);
+    
+  } catch (err) {
+    console.error('Error submitting test:', err);
+    return res.status(500).redirect('/user/dashboard?error=Test submission failed');
+  }
+};
 
 userController.updateProgress = async (req, res) => {
   try {
@@ -105,7 +181,7 @@ userController.updateProgress = async (req, res) => {
   } catch (err) {
     console.error('Error in dashboard route:', err);
 
-    // ✅ don’t send again if already sent
+    // ✅ don't send again if already sent
     if (!res.headersSent) {
       return res.status(500).send('Internal Server Error');
     }

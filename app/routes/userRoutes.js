@@ -21,6 +21,9 @@ userRoutes.get('/dashboard', authMiddleware, userController.getDashboard);
 //   res.render('dashboard');
 // });
 
+// handle test submission and progress update
+userRoutes.post('/progress', authMiddleware, userController.submitTest);
+
 // get progress data for a user
 userRoutes.get('/:userId', authMiddleware, userController.getProgress);
 

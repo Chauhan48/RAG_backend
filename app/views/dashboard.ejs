@@ -111,6 +111,19 @@
   <div class="dashboard-container">
     <h1>Dashboard</h1>
 
+    <!-- Success/Error Messages -->
+    <% if (typeof testCompleted !== 'undefined' && testCompleted) { %>
+      <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+        <strong>Test Completed!</strong> Your score: <strong><%= lastScore %>%</strong>
+      </div>
+    <% } %>
+    
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+        <strong>Error:</strong> <%= error %>
+      </div>
+    <% } %>
+
     <div class="section">
       <h2>Current Level</h2>
       <p class="level"><%= level %></p>
@@ -118,8 +131,15 @@
 
     <div class="section">
       <h2>Score Trends</h2>
-      <div id="score-chart" class="chart-placeholder">Score Trend Chart Here</div>
-      <!-- Integrate Chart.js or other JS chart library to render actual chart -->
+      <% if (scoreHistory && scoreHistory.length > 0) { %>
+        <div id="score-chart-container" style="position: relative; height: 300px; width: 100%;">
+          <canvas id="score-chart"></canvas>
+        </div>
+      <% } else { %>
+        <div style="text-align: center; padding: 40px; color: #666; font-style: italic;">
+          <p>No test scores yet. Take your first test to see your progress chart!</p>
+        </div>
+      <% } %>
     </div>
 
     <div class="section">
@@ -151,6 +171,9 @@
     </div>
   </div>
 
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <script>
     const takeTestBtn = document.getElementById('take-test-btn');
     const testOptions = document.getElementById('test-options');
@@ -170,6 +193,107 @@
       // Redirect to new test page with difficulty as URL param
       window.location.href = `/test/${level.toLowerCase()}`;
     }
+
+    // Score Chart Implementation
+    function initializeScoreChart() {
+      const ctx = document.getElementById('score-chart').getContext('2d');
+      
+      // Get score history data from server
+      const scoreHistory = <%- JSON.stringify(scoreHistory || []) %>;
+      
+      // Sort score history by date (oldest to newest) to ensure proper chronological order
+      const sortedScores = scoreHistory.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // Extract labels (dates) and data (scores)
+      const labels = sortedScores.map(entry => {
+        const date = new Date(entry.date);
+        return date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric' 
+        });
+      });
+      
+      const scores = sortedScores.map(entry => entry.score);
+      
+      // Create the chart
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Test Score (%)',
+            data: scores,
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#4CAF50',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Your Test Performance Over Time',
+              font: {
+                size: 16,
+                weight: 'bold'
+              }
+            },
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Score (%)'
+              },
+              grid: {
+                color: 'rgba(0,0,0,0.1)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Test Date'
+              },
+              grid: {
+                color: 'rgba(0,0,0,0.1)'
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          elements: {
+            point: {
+              hoverBackgroundColor: '#2E7D32'
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize chart when page loads (only if there's score history)
+    document.addEventListener('DOMContentLoaded', function() {
+      const scoreHistory = <%- JSON.stringify(scoreHistory || []) %>;
+      if (scoreHistory && scoreHistory.length > 0) {
+        initializeScoreChart();
+      }
+    });
 
   </script>
 </body>
