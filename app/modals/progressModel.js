@@ -1,15 +1,24 @@
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const progressSchema = new mongoose.Schema({
-  student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
-  level: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' },
-  scoreHistory: [
-    {
-      date: { type: Date, default: Date.now },
-      score: Number, // e.g., percentage or points
-    }
-  ],
-  weakAreas: [String] // Array of topic names or skill identifiers
+const progressSchema = Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
+    level: {
+        type: String,
+        enum: ['Beginner', 'Intermediate', 'Advanced'],
+        default: 'Beginner'
+    },
+    scoreHistory: [
+        {
+            date: { type: Date, default: Date.now },
+            score: Number,
+        }
+    ],
+    weakAreas: [String]
 });
 
-module.exports = mongoose.model('Progress', progressSchema);
+const progressModel = model('progress', progressSchema);
+module.exports = progressModel;

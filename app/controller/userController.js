@@ -1,3 +1,4 @@
+const progressModel = require('../modals/progressModel');
 const userModel = require('../modals/userModal');
 const dbServices = require('../services/databaseService');
 const common = require('../utils/common');
@@ -46,6 +47,69 @@ userController.login = async (req, res) => {
     return res.status(401).render('login', { errorMsg: err.message, successMsg: null });
   }
 
+}
+
+userController.getDashboard = async (req, res) => {
+  try {
+    const progress = await progressModel.findOne({ userId: req.user._id });
+    if (!progress) {
+      res.render('dashboard', {
+        level: progress ? progress.level : 'Beginner',
+        weakAreas: progress && Array.isArray(progress.weakAreas) ? progress.weakAreas : [],
+        scoreHistory: progress ? progress.scoreHistory : []
+      });
+
+    }
+
+    res.render('dashboard', {
+      level: progress ? progress.level : 'Beginner',
+      weakAreas: Array.isArray(progress?.weakAreas) ? progress.weakAreas : [],
+      scoreHistory: progress ? progress.scoreHistory : []
+    });
+
+  } catch (err) {
+    res.status(500).send('Server error');
+  }
+};
+
+
+userController.getProgress = async (req, res) => {
+  try {
+    const userId = common.convertToMongoDbObjectId(req.params.userId);
+    const progress = await dbServices.findOne(progressModel, { userId });
+    if (!progress) return res.status(404).json({ message: 'Progress not found' });
+    res.json(progress);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+userController.updateProgress = async (req, res) => {
+  try {
+    const { level, score, weakAreas } = req.body;
+
+    const userId = common.convertToMongoDbObjectId(req.params.userId);
+    const progress = await dbServices.findOne(progressModel, { userId });
+
+    if (!progress) {
+      await dbServices.insert(progressModel, { userId })
+    }
+
+    if (level) progress.level = level;
+
+    if (score !== undefined) {
+      progress.scoreHistory.push({ score, date: new Date() });
+    }
+
+    if (Array.isArray(weakAreas)) {
+      progress.weakAreas = weakAreas;
+    }
+
+    await progress.save();
+    res.json(progress);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
 
 module.exports = userController;
