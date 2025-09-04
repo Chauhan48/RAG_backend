@@ -18,7 +18,12 @@ userController.signup = async (req, res) => {
     const hashedPassword = await common.hashPassword(userData.password);
     userData.password = hashedPassword;
 
-    await dbServices.insert(userModel, userData);
+    const user = await dbServices.insert(userModel, userData);
+    const token = common.generateToken({ userId: user._id });
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000
+    });
 
     return res.redirect('/user/dashboard');
   } catch (error) {
@@ -41,6 +46,11 @@ userController.login = async (req, res) => {
     if (!comparePass) {
       throw new Error('Invalid email or password');
     }
+    const token = common.generateToken({ userId: userData._id });
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000
+    });
 
     return res.redirect('/user/dashboard')
   } catch (err) {

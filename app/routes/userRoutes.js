@@ -1,6 +1,7 @@
 const express = require('express');
 const userRoutes = express.Router();
 const userController = require('../controller/userController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // signup routes
 userRoutes.get('', (_, res) => { 
@@ -15,7 +16,7 @@ userRoutes.get('/login', (_, res) => {
 userRoutes.post('/login', userController.login);
 
 // dashboard route
-userRoutes.get('/dashboard', (_, res) => {
+userRoutes.get('/dashboard', authMiddleware, (_, res) => {
   res.render('dashboard');
 });
 
