@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test - <%= difficulty %> Level</title>
+  <style>
+    button {
+      margin: 1% 40%;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #34db6e;
+      background-color: white;
+      color: #34db6e;
+      border-radius: 4px;
+      
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    button:hover {
+      background-color: #34db6e;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= difficulty %> Level Test</h1>
+
+  <form action="/user/dashboard" method="POST">
+    <% questions.forEach((q, idx) => { %>
+      <div class="question-block">
+        <p><%= idx + 1 %>. <%= q.question %></p>
+        <% q.options.forEach((opt, i) => { %>
+          <label>
+            <input type="radio" name="question_<%= idx %>" value="<%= i %>" required>
+            <%= opt %>
+          </label><br>
+        <% }) %>
+      </div>
+    <% }) %>
+
+    <button type="submit">Submit Test</button>
+  </form>
+</body>
+</html>
