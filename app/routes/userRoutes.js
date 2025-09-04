@@ -24,6 +24,11 @@ userRoutes.get('/dashboard', authMiddleware, userController.getDashboard);
 // handle test submission and progress update
 userRoutes.post('/progress', authMiddleware, userController.submitTest);
 
+// profile management routes
+userRoutes.get('/profile', authMiddleware, userController.getProfile);
+userRoutes.post('/profile', authMiddleware, userController.updateProfile);
+userRoutes.post('/logout', authMiddleware, userController.logout);
+
 // get progress data for a user
 userRoutes.get('/:userId', authMiddleware, userController.getProgress);
 

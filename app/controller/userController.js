@@ -69,6 +69,7 @@ userController.getDashboard = async (req, res) => {
     const error = req.query.error;
     
     return res.render('dashboard', {
+      user: req.user,
       level: progress ? progress.level : 'Beginner',
       weakAreas: progress && Array.isArray(progress.weakAreas) ? progress.weakAreas : [],
       scoreHistory: progress ? progress.scoreHistory : [],
@@ -162,6 +163,103 @@ userController.submitTest = async (req, res) => {
   }
 };
 
+userController.getProfile = async (req, res) => {
+  try {
+    return res.render('profile', {
+      user: req.user,
+      successMsg: null,
+      errorMsg: null
+    });
+  } catch (err) {
+    console.error('Error getting profile:', err);
+    return res.status(500).render('profile', {
+      user: req.user,
+      successMsg: null,
+      errorMsg: 'Error loading profile'
+    });
+  }
+};
+
+userController.updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.user._id;
+
+    // Verify current password
+    const user = await userModel.findById(userId);
+    const isCurrentPasswordValid = await common.comparePassword(currentPassword, user.password);
+    
+    if (!isCurrentPasswordValid) {
+      return res.render('profile', {
+        user: req.user,
+        successMsg: null,
+        errorMsg: 'Current password is incorrect'
+      });
+    }
+
+    // Validate new password if provided
+    if (newPassword) {
+      if (newPassword !== confirmPassword) {
+        return res.render('profile', {
+          user: req.user,
+          successMsg: null,
+          errorMsg: 'New passwords do not match'
+        });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.render('profile', {
+          user: req.user,
+          successMsg: null,
+          errorMsg: 'New password must be at least 6 characters long'
+        });
+      }
+    }
+
+    // Update user data
+    const updateData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim()
+    };
+
+    if (newPassword) {
+      updateData.password = await common.hashPassword(newPassword);
+    }
+
+    await userModel.findByIdAndUpdate(userId, updateData);
+
+    // Get updated user data
+    const updatedUser = await userModel.findById(userId);
+
+    return res.render('profile', {
+      user: updatedUser,
+      successMsg: 'Profile updated successfully!',
+      errorMsg: null
+    });
+
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    return res.render('profile', {
+      user: req.user,
+      successMsg: null,
+      errorMsg: 'Error updating profile. Please try again.'
+    });
+  }
+};
+
+userController.logout = async (req, res) => {
+  try {
+    // Clear the auth cookie
+    res.clearCookie('auth_token');
+    
+    // Redirect to login page
+    return res.redirect('/user/login');
+  } catch (err) {
+    console.error('Error during logout:', err);
+    return res.redirect('/user/login');
+  }
+};
+
 userController.updateProgress = async (req, res) => {
   try {
     console.log('Dashboard route, req.user:', req.user);
@@ -171,7 +269,6 @@ userController.updateProgress = async (req, res) => {
 
     console.log('Progress:', progress);
 
-    // ✅ response sent exactly once
     return res.render('dashboard', {
       level: progress ? progress.level : 'Beginner',
       weakAreas: progress ? progress.weakAreas : [],
@@ -181,7 +278,6 @@ userController.updateProgress = async (req, res) => {
   } catch (err) {
     console.error('Error in dashboard route:', err);
 
-    // ✅ don't send again if already sent
     if (!res.headersSent) {
       return res.status(500).send('Internal Server Error');
     }

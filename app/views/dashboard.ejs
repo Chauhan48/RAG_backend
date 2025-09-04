@@ -107,9 +107,20 @@
     level = typeof level !== 'undefined' ? level : 'Beginner'; 
     weakAreas = typeof weakAreas !== 'undefined' ? weakAreas : [];
   %>
+  <div></div>
 
   <div class="dashboard-container">
-    <h1>Dashboard</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h1 style="margin: 0;">Dashboard</h1>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="text-align: right;">
+          <div style="font-weight: bold; color: #333;">Welcome, <%= user.firstName %> <%= user.lastName %></div>
+          <div style="font-size: 0.9em; color: #666;"><%= user.email %></div>
+        </div>
+        <button onclick="window.location.href='/user/profile'" style="padding: 8px 16px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Profile</button>
+        <button onclick="logout()" style="padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Logout</button>
+      </div>
+    </div>
 
     <!-- Success/Error Messages -->
     <% if (typeof testCompleted !== 'undefined' && testCompleted) { %>
@@ -192,6 +203,14 @@
 
       // Redirect to new test page with difficulty as URL param
       window.location.href = `/test/${level.toLowerCase()}`;
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear auth cookie and redirect to login
+        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/user/login';
+      }
     }
 
     // Score Chart Implementation
