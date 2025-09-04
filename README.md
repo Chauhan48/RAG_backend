@@ -14,11 +14,11 @@ Allows users to register, take quizzes at different difficulty levels, track pro
 
 ## Installation
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/your-username/quiz-app.git
-   cd quiz-app
-   ```
+1.**Clone the repo**
+  ```bash
+  git clone https://github.com/your-username/quiz-app.git
+  cd quiz-app
+  ```
 2. **install dependencies**
   ```bash
   npm install
