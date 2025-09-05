@@ -11,6 +11,7 @@ Allows users to register, take quizzes at different difficulty levels, track pro
 - bcrypt for password hashing  
 - JSON Web Tokens (JWT) for authentication  
 - JavaScript, HTML, CSS 
+- Chart.js (via CDN) for charts and data visulization
 
 ## Installation
 
