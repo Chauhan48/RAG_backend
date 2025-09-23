@@ -6,7 +6,7 @@ const authMiddleware = async (req, res, next) => {
     const token = req.cookies.auth_token;
 
     if (!token) {
-      return res.status(401).render('unauthorized');
+      return res.status(401).json({ message: 'unauthorized'});
     }
     const decoded = common.decryptToken(token);
     const userId = common.convertToMongoDbObjectId(decoded.userId);
@@ -15,7 +15,7 @@ const authMiddleware = async (req, res, next) => {
     
     next();
   } catch (err) {
-    return res.status(401).render('unauthorized');
+    return res.status(401).json({ message: 'unauthorized'});
   }
 };
 
