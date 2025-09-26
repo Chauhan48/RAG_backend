@@ -55,7 +55,7 @@ questionsController.fetchTopics = async (req, res) => {
 
 questionsController.fetchQuestions = async (req, res) => {
     try{
-        const {topic} = req.body;
+        const {topic} = req.query;
         const questions = await questionModel.find({topic});
 
         return res.status(200).json({ questions });
