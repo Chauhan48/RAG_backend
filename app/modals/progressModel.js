@@ -6,15 +6,14 @@ const progressSchema = Schema({
         ref: 'user',
         required: true
     },
-    level: {
-        type: String,
-        enum: ['Beginner', 'Intermediate', 'Advanced'],
-        default: 'Beginner'
+    scorePercentage:
+    {
+        type: Number,
     },
-    scoreHistory: [
+    incorrectQuestions: [
         {
-            date: { type: Date, default: Date.now },
-            score: Number,
+            type: Schema.Types.ObjectId,
+            ref: 'question'
         }
     ],
     weakAreas: [String]

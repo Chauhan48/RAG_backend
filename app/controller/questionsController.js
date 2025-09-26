@@ -1,3 +1,4 @@
+const progressModel = require("../modals/progressModel");
 const questionModel = require("../modals/questionModel");
 const aiServices = require("../services/aiServices");
 const dbServices = require("../services/databaseService");
@@ -65,5 +66,29 @@ questionsController.fetchQuestions = async (req, res) => {
     }
 }
 
+questionsController.updateScore = async (req, res) => {
+  try {
+    const user = req.user;
+    const { scorePercentage, incorrectQuestions } = req.body;
+
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    let progress = new progressModel({
+        userId: user._id,
+        scorePercentage,
+        incorrectQuestions,
+        weakAreas: [] 
+      });
+
+    await progress.save();
+
+    res.status(200).json({ message: 'Progress saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
 
 module.exports = questionsController;
