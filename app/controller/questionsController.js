@@ -53,5 +53,17 @@ questionsController.fetchTopics = async (req, res) => {
     }
 }
 
+questionsController.fetchQuestions = async (req, res) => {
+    try{
+        const {topic} = req.body;
+        const questions = await questionModel.find({topic});
+
+        return res.status(200).json({ questions });
+
+    }catch(err){
+        return res.status(300).json({ message: err.message });
+    }
+}
+
 
 module.exports = questionsController;

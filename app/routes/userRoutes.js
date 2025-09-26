@@ -14,4 +14,6 @@ userRoutes.post('/video-url', authMiddleware, questionsController.generateVideoQ
 
 userRoutes.get('/topics', authMiddleware, questionsController.fetchTopics);
 
+userRoutes.get('/questions', authMiddleware, questionsController.fetchQuestions);
+
 module.exports = userRoutes;
