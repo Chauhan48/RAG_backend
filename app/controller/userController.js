@@ -22,7 +22,7 @@ userController.signup = async (req, res) => {
     const token = common.generateToken({ userId: user._id });
     res.cookie('auth_token', token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     });
@@ -51,7 +51,7 @@ userController.login = async (req, res) => {
     const token = common.generateToken({ userId: userData._id });
     res.cookie('auth_token', token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     });
