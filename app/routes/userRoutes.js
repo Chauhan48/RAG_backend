@@ -18,4 +18,6 @@ userRoutes.get('/questions', authMiddleware, questionsController.fetchQuestions)
 
 userRoutes.post('/progress', authMiddleware, questionsController.updateScore);
 
+userRoutes.get('/scores', authMiddleware, questionsController.getScore);
+
 module.exports = userRoutes;

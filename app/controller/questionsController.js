@@ -91,4 +91,24 @@ questionsController.updateScore = async (req, res) => {
   }
 }
 
+questionsController.getScore = async (req, res) => {
+    try {
+    // Fetch all progress documents for the user
+    const user = req.user;
+    const progressRecords = await progressModel.find({ userId: user._id }).select('scorePercentage incorrectQuestions weakAreas');
+
+    // Extract scores as needed
+    const scores = progressRecords.map(record => ({
+      scorePercentage: record.scorePercentage,
+      incorrectQuestions: record.incorrectQuestions,
+      weakAreas: record.weakAreas,
+      id: record._id
+    }));
+
+    return res.status(200).json({scores});
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
 module.exports = questionsController;
